@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="/static/style.css">
+    <title>{{.title}}</title>
+    <style>
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 24px;
+            border-radius: 8px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 90%;
+            overflow-y: auto;
+        }
+
+        .modal-close {
+            cursor: pointer;
+            font-size: 24px;
+            border: none;
+            background: none;
+            float: right;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>FIWARE Project Generator</h1>
+
+    <div class="section">
+        <div class="section-title">Project Type</div>
+        <div class="card-grid card-grid-3">
+            <div class="card selected">
+                <div class="card-title">Full Project</div>
+                <div class="card-description">Complete IoT + FIWARE solution</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Just IoT</div>
+                <div class="card-description">IoT devices and sensors only</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Just FIWARE</div>
+                <div class="card-description">FIWARE platform components only</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Modules (Select all that apply)</div>
+        <div class="card-grid card-grid-3">
+            <div class="card selected">
+                <div class="card-title">Prometheus</div>
+                <div class="card-description">Monitoring and alerting toolkit</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Mosquitto</div>
+                <div class="card-description">MQTT message broker</div>
+            </div>
+            <div class="card selected">
+                <div class="card-title">Grafana</div>
+                <div class="card-description">Data visualization platform</div>
+            </div>
+            <div class="card more">
+                <div class="card-title">More</div>
+                <div class="card-description">View all modules</div>
+            </div>
+        </div>
+
+        <div class="selected-summary">
+            <div class="selected-summary-title">Selected Modules:</div>
+            <div class="selected-tags">
+                <span class="selected-tag">Prometheus</span>
+                <span class="selected-tag">Grafana</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Project Details</div>
+        <div class="form-group">
+            <label class="label">Project Name</label>
+            <input class="input" type="text" id="project-name" placeholder="Enter project name">
+        </div>
+
+        <div class="form-group">
+            <label class="label">Description</label>
+            <textarea class="textarea" id="project-description" placeholder="Describe your project"></textarea>
+        </div>
+
+        <div class="grid grid-2">
+            <div class="form-group">
+                <label class="label">Programming Language</label>
+                <select class="select" id="language">
+                    <option>C</option>
+                    <option>Python</option>
+                    <option>JavaScript</option>
+                </select>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="text-center">
+            <button class="btn btn-primary">Generate Project</button>
+            <button class="btn btn-secondary" style="margin-left: 12px;">Save Configuration</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-backdrop">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">All Available Modules</h2>
+            <button class="modal-close">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="card-grid card-grid-3">
+                <div class="card">
+                    <div class="card-title">Prometheus</div>
+                    <div class="card-description">Monitoring toolkit</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Mosquitto</div>
+                    <div class="card-description">MQTT broker</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Grafana</div>
+                    <div class="card-description">Visualization</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Node-RED</div>
+                    <div class="card-description">Flow programming</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">InfluxDB</div>
+                    <div class="card-description">Time series DB</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Redis</div>
+                    <div class="card-description">Cache store</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const cards = document.querySelectorAll('.card:not(.more)');
+        cards.forEach(card => {
+            card.addEventListener('click', function () {
+                this.classList.toggle('selected');
+                updateSelectedSummary();
+            });
+        });
+
+        const projectCards = document.querySelectorAll('.card-grid-3 .card');
+        projectCards.forEach(card => {
+            card.addEventListener('click', function () {
+                this.parentElement.querySelectorAll('.card').forEach(c => {
+                    c.classList.remove('selected', 'selected-green', 'selected-purple');
+                });
+                const title = this.querySelector('.card-title').textContent;
+                if (title === 'Just IoT') {
+                    this.classList.add('selected-green');
+                } else if (title === 'Just FIWARE') {
+                    this.classList.add('selected-purple');
+                } else {
+                    this.classList.add('selected');
+                }
+            });
+        });
+
+        function updateSelectedSummary() {
+            const selectedCards = document.querySelectorAll('.card.selected');
+            const tagsContainer = document.querySelector('.selected-tags');
+            if (tagsContainer) {
+                tagsContainer.innerHTML = '';
+                selectedCards.forEach(card => {
+                    const title = card.querySelector('.card-title').textContent;
+                    const tag = document.createElement('span');
+                    tag.className = 'selected-tag';
+                    tag.textContent = title;
+                    tagsContainer.appendChild(tag);
+                });
+            }
+        }
+
+        updateSelectedSummary();
+
+        const moreCard = document.querySelector('.card.more');
+        const modal = document.querySelector('.modal-backdrop');
+        const closeModal = document.querySelector('.modal-close');
+
+        moreCard.addEventListener('click', () => {
+            modal.style.display = 'flex';
+        });
+
+        closeModal.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+        document.querySelector('.btn-primary').addEventListener('click', function () {
+            const name = document.getElementById('project-name').value;
+            const description = document.getElementById('project-description').value;
+            const language = document.getElementById('language').value;
+
+            const selectedModules = Array.from(document.querySelectorAll('.card.selected .card-title'))
+                .map(el => el.textContent);
+
+            const data = {
+                name,
+                description,
+                language,
+                modules: selectedModules
+            };
+
+            fetch('/project', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            }).then(res => {
+                if (res.ok) {
+                    alert('Project generated successfully!');
+                } else {
+                    alert('Failed to generate project.');
+                }
+            }).catch(err => {
+                console.error('Error:', err);
+                alert('Error sending project data.');
+            });
+        });
+    });
+</script>
+</body>
+</html>

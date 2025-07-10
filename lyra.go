@@ -3,10 +3,9 @@ Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 */
 package main
 
-import (
-	"lyra/cmd"
-)
+import "lyra/web"
 
 func main() {
-	cmd.Execute()
+	// cmd.Execute()
+	web.Server()
 }
