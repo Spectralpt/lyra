@@ -1,14 +1,19 @@
-package utils
+package internal
 
 import (
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
-	// "github.com/compose-spec/compose-go/v2/cli"
 )
 
-func isDockerInstalled() bool {
+type ComposeModule interface {
+	Name() string
+	ComposeFragment() map[string]any
+	Extend(others map[string]any) error
+}
+
+func IsDockerInstalled() bool {
 	_, err := exec.LookPath("docker")
 	if err != nil {
 		fmt.Println(err)
@@ -19,7 +24,7 @@ func isDockerInstalled() bool {
 	return true
 }
 
-func createCompose() error {
+func CreateComposeAfter() error {
 	dir, err := ProjectRoot()
 	if err != nil {
 		fmt.Println("Couldnt find a lyra project")
@@ -43,22 +48,12 @@ func createCompose() error {
 	return err
 }
 
-// func main() {
-// 	dir, _ := projectRoot()
-// 	composeFilePath := filepath.Join(dir, "docker-compose.yml")
-// 	ctx := context.Background()
-// 	options, err := cli.NewProjectOptions([]string{composeFilePath})
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-//
-// 	project, err := options.LoadProject(ctx)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// 	projectYaml, err := project.MarshalYAML()
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// 	fmt.Println(string(projectYaml))
-// }
+func CreateCompose(path string) error {
+	f, err := os.Create(filepath.Join(path, "docker-compose.yaml"))
+	if err != nil {
+		fmt.Println("Could not create docker-compose.yml")
+		return err
+	}
+	defer f.Close()
+	return err
+}

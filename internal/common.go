@@ -1,4 +1,4 @@
-package utils
+package internal
 
 import (
 	"fmt"
@@ -22,7 +22,7 @@ func ProjectRoot() (string, error) {
 		if err == nil {
 			return dir, nil
 		}
-		fmt.Printf("Could not find in: %v\n", dir)
+
 		parent := filepath.Dir(dir)
 		if parent == dir {
 			break

@@ -1,4 +1,4 @@
-package utils
+package internal
 
 import (
 	"errors"
@@ -13,13 +13,15 @@ func isGitInstalled() bool {
 	return true
 }
 
-func GitInit(name string) error {
+func GitInit(dir string) error {
 	if !isGitInstalled() {
 		return errors.New("git is not installed")
 	}
 	cmd := exec.Command("git", "init")
-	err := cmd.Err
+	cmd.Dir = dir
+	err := cmd.Run()
 	if err != nil {
+		println("from gitinit:", err.Error())
 		return err
 	}
 	return nil
