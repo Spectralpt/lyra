@@ -62,32 +62,23 @@
         </div>
     </div>
 
+    <!-- Inside your existing .section for Modules -->
     <div class="section">
         <div class="section-title">Modules (Select all that apply)</div>
         <div class="card-grid card-grid-3">
-            <div class="card selected">
-                <div class="card-title">Prometheus</div>
-                <div class="card-description">Monitoring and alerting toolkit</div>
-            </div>
+            {{ range .modules }}
             <div class="card">
-                <div class="card-title">Mosquitto</div>
-                <div class="card-description">MQTT message broker</div>
+                <div class="card-title">{{ .Name }}</div>
+                <div class="card-description">{{ .Description }}</div>
             </div>
-            <div class="card selected">
-                <div class="card-title">Grafana</div>
-                <div class="card-description">Data visualization platform</div>
-            </div>
-            <div class="card more">
-                <div class="card-title">More</div>
-                <div class="card-description">View all modules</div>
-            </div>
+            {{ end }}
         </div>
 
+        <!-- Selected Modules Summary -->
         <div class="selected-summary">
             <div class="selected-summary-title">Selected Modules:</div>
             <div class="selected-tags">
-                <span class="selected-tag">Prometheus</span>
-                <span class="selected-tag">Grafana</span>
+                <!-- JS will fill this dynamically -->
             </div>
         </div>
     </div>
@@ -108,9 +99,9 @@
             <div class="form-group">
                 <label class="label">Programming Language</label>
                 <select class="select" id="language">
-                    <option>C</option>
-                    <option>Python</option>
-                    <option>JavaScript</option>
+                    {{ range .languages }}
+                    <option>{{ . }}</option>
+                    {{ end }}
                 </select>
             </div>
 
@@ -125,55 +116,22 @@
     </div>
 </div>
 
-<div class="modal-backdrop">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2 class="modal-title">All Available Modules</h2>
-            <button class="modal-close">×</button>
-        </div>
-        <div class="modal-body">
-            <div class="card-grid card-grid-3">
-                <div class="card">
-                    <div class="card-title">Prometheus</div>
-                    <div class="card-description">Monitoring toolkit</div>
-                </div>
-                <div class="card">
-                    <div class="card-title">Mosquitto</div>
-                    <div class="card-description">MQTT broker</div>
-                </div>
-                <div class="card">
-                    <div class="card-title">Grafana</div>
-                    <div class="card-description">Visualization</div>
-                </div>
-                <div class="card">
-                    <div class="card-title">Node-RED</div>
-                    <div class="card-description">Flow programming</div>
-                </div>
-                <div class="card">
-                    <div class="card-title">InfluxDB</div>
-                    <div class="card-description">Time series DB</div>
-                </div>
-                <div class="card">
-                    <div class="card-title">Redis</div>
-                    <div class="card-description">Cache store</div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const cards = document.querySelectorAll('.card:not(.more)');
-        cards.forEach(card => {
+        // Handle module cards (targeting the second section with card-grid-3)
+        const moduleSection = document.querySelectorAll('.section')[1]; // Second section contains modules
+        const moduleCards = moduleSection ? moduleSection.querySelectorAll('.card-grid-3 .card') : [];
+        moduleCards.forEach(card => {
             card.addEventListener('click', function () {
                 this.classList.toggle('selected');
                 updateSelectedSummary();
             });
         });
 
-        const projectCards = document.querySelectorAll('.card-grid-3 .card');
-        projectCards.forEach(card => {
+        // Handle project type cards specifically (first section)
+        const projectTypeSection = document.querySelectorAll('.section')[0]; // First section contains project types
+        const projectTypeCards = projectTypeSection ? projectTypeSection.querySelectorAll('.card-grid-3 .card') : [];
+        projectTypeCards.forEach(card => {
             card.addEventListener('click', function () {
                 this.parentElement.querySelectorAll('.card').forEach(c => {
                     c.classList.remove('selected', 'selected-green', 'selected-purple');
@@ -210,19 +168,25 @@
         const modal = document.querySelector('.modal-backdrop');
         const closeModal = document.querySelector('.modal-close');
 
-        moreCard.addEventListener('click', () => {
-            modal.style.display = 'flex';
-        });
+        if (moreCard) {
+            moreCard.addEventListener('click', () => {
+                modal.style.display = 'flex';
+            });
+        }
 
-        closeModal.addEventListener('click', () => {
-            modal.style.display = 'none';
-        });
-
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
+        if (closeModal) {
+            closeModal.addEventListener('click', () => {
                 modal.style.display = 'none';
-            }
-        });
+            });
+        }
+
+        if (modal) {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
 
         document.querySelector('.btn-primary').addEventListener('click', function () {
             const name = document.getElementById('project-name').value;
