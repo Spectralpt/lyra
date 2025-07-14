@@ -5,4 +5,5 @@ type Project struct {
 	Language string
 	Modules  []string
 	Git      bool
+	License  string
 }

@@ -5,7 +5,7 @@ package cmd
 
 import (
 	"lyra/internal"
-	"lyra/internal/types"
+	"lyra/types"
 
 	"github.com/spf13/cobra"
 )
@@ -24,13 +24,16 @@ to quickly create a Cobra application.`,
 
 		name, _ := cmd.Flags().GetString("name")
 		language, _ := cmd.Flags().GetString("language")
+		modules, _ := cmd.Flags().GetStringSlice("modules")
 		git, _ := cmd.Flags().GetBool("git")
+		license, _ := cmd.Flags().GetString("license")
 
 		project := types.Project{
 			Name:     name,
 			Language: language,
-			Modules:  nil,
+			Modules:  modules,
 			Git:      git,
+			License:  license,
 		}
 		err := internal.ScaffoldProject(project)
 		if err != nil {
@@ -46,4 +49,5 @@ func init() {
 	createCmd.Flags().StringP("language", "l", "myproject", "specify project language")
 	createCmd.Flags().StringSliceP("modules", "m", []string{}, "specify fiware modules to install")
 	createCmd.Flags().BoolP("git", "g", false, "setup git repo")
+	createCmd.Flags().StringSlice("license", []string{}, "specify what license you want your project to use")
 }
