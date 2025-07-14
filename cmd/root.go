@@ -4,9 +4,10 @@ Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"github.com/spf13/cobra"
 	"lyra/cmd/ui"
 	"os"
+
+	"github.com/spf13/cobra"
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -20,8 +21,6 @@ var rootCmd = &cobra.Command{
 		isInteractive, _ := cmd.Flags().GetBool("interactive")
 		if isInteractive {
 			ui.RunInteractive()
-		} else {
-			os.Exit(0)
 		}
 	},
 }
