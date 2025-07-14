@@ -104,7 +104,20 @@
                     {{ end }}
                 </select>
             </div>
+        </div>
 
+        <div class="form-group">
+            <label for="git">Initialize with Git</label>
+            <input class="input" type="checkbox" id="git">
+        </div>
+
+        <div class="form-group">
+            <label for="license">License</label>
+            <select class="select" id="license">
+                {{ range .licences }}
+                <option>{{ . }}</option>
+                {{ end }}
+            </select>
         </div>
     </div>
 
@@ -192,27 +205,24 @@
             const name = document.getElementById('project-name').value;
             const description = document.getElementById('project-description').value;
             const language = document.getElementById('language').value;
+            const git = document.getElementById('git').checked;
+            const license = document.getElementById('license').value;
 
             const selectedModules = Array.from(document.querySelectorAll('.card.selected .card-title'))
                 .map(el => el.textContent);
 
             const data = {
                 name,
-                description,
                 language,
-                modules: selectedModules
+                modules: selectedModules,
+                git,
+                license
             };
 
             fetch('/project', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(data)
-            }).then(res => {
-                if (res.ok) {
-                    alert('Project generated successfully!');
-                } else {
-                    alert('Failed to generate project.');
-                }
             }).catch(err => {
                 console.error('Error:', err);
                 alert('Error sending project data.');

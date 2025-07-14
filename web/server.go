@@ -5,16 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"lyra/utils"
+	"lyra/globals"
+	"lyra/internal"
+	"lyra/types"
+	_ "lyra/types"
 	"os"
 )
-
-type Project struct {
-	Name        string   `form:"name" json:"name"`
-	Description string   `form:"description" json:"description"`
-	Language    string   `form:"language" json:"language"`
-	Modules     []string `form:"modules" json:"modules"`
-}
 
 func Server() {
 	router := gin.Default()
@@ -30,9 +26,9 @@ func Server() {
 	router.GET("/project", func(c *gin.Context) {
 		c.HTML(200, "project.html", gin.H{
 			"title":     "Lyra: Create Project",
-			"languages": utils.AvailableLanguages,
-			"licenses":  utils.AvailableLicenses,
-			"modules":   utils.AvailableModules,
+			"languages": globals.AvailableLanguages,
+			"licenses":  globals.AvailableLicenses,
+			"modules":   globals.AvailableModules,
 		})
 	})
 
@@ -64,7 +60,7 @@ func Server() {
 			return
 		}
 
-		var project Project
+		var project types.Project
 		if err := json.Unmarshal(file, &project); err != nil {
 			c.HTML(500, "error.html", gin.H{
 				"title":   "Error",
@@ -81,7 +77,7 @@ func Server() {
 	})
 
 	router.POST("/project", func(c *gin.Context) {
-		var project Project
+		var project types.Project
 
 		if err := c.ShouldBind(&project); err != nil {
 			c.JSON(400, gin.H{"error": "Project name is required"})
@@ -117,6 +113,10 @@ func Server() {
 			return
 		}
 
+		err = internal.ScaffoldProject(project)
+		if err != nil {
+			return
+		}
 		c.Redirect(302, "/project-creating?id="+key)
 	})
 
