@@ -64,6 +64,10 @@ func RunInteractive() {
 				Description("What license are you going to use").
 				Options(huh.NewOptions("MIT", "Apache", "GPLv3", "None")...).
 				Value(&project.License),
+			huh.NewConfirm().
+				Title("Git version control").
+				Description("Do you want to create a git repository").
+				Value(&project.Git),
 		),
 	)
 
@@ -95,12 +99,13 @@ func RunInteractive() {
 			return lipgloss.NewStyle().Foreground(lipgloss.Color("212")).Render(str)
 		}
 		fmt.Fprintf(&sb,
-			"%s\nType:%s\nName:%s\nWritten in: %s\nLicense:%s",
+			"%s\nModules:%s\nName:%s\nWritten in: %s\nLicense:%s\nGit:%s",
 			lipgloss.NewStyle().Bold(true).Render("Project"),
 			keyword(project.Modules),
 			keyword(project.Name),
 			keyword(project.Language),
 			keyword(project.License),
+			keyword(project.Git),
 		)
 
 		fmt.Println(
