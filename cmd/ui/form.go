@@ -2,6 +2,9 @@ package ui
 
 import (
 	"fmt"
+	"lyra/globals"
+	"lyra/internal"
+	"lyra/types"
 	"os"
 	"strconv"
 	"strings"
@@ -12,39 +15,59 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-type Project struct {
-	Name    string
-	Type    string
-	Lang    string
-	License string
+func GetModulesFromUi(project types.Project) []string {
+	// Create a lookup map for available modules
+	moduleMap := make(map[string]types.Module)
+	for _, mod := range globals.AvailableModules {
+		moduleMap[mod.Name] = mod
+	}
+
+	var modules []string
+	for _, moduleName := range project.Modules {
+		switch moduleName {
+		case "Iot Agent - Json":
+			if _, exists := moduleMap["fiware-iot-agent"]; exists {
+				modules = append(modules, "fiware-iot-agent")
+			}
+		case "Quantum Leap":
+			if _, exists := moduleMap["fiware-quantumleap"]; exists {
+				modules = append(modules, "fiware-quantumleap")
+			}
+		}
+	}
+	return modules
 }
 
 func RunInteractive() {
-	test := Project{}
+	project := types.Project{}
 
 	// Should we run in accessible mode?
 	accessible, _ := strconv.ParseBool(os.Getenv("ACCESSIBLE"))
 
 	form := huh.NewForm(
 		huh.NewGroup(
-			huh.NewSelect[string]().
-				Title("Type").
-				Description("What type of project do you want to create").
-				Options(huh.NewOptions("Fiware Context Broker", "Fiware IoT Agent")...).
-				Value(&test.Type),
 			huh.NewInput().
 				Title("Project Name").
-				Value(&test.Name),
+				Value(&project.Name),
+			huh.NewMultiSelect[string]().
+				Title("Fiware Modules").
+				Description("What Fiware modules do you want to include").
+				Options(huh.NewOptions("IoT Agent - Json", "Quantum Leap")...).
+				Value(&project.Modules),
 			huh.NewSelect[string]().
 				Title("Language").
 				Description("What language are you going to use").
 				Options(huh.NewOptions("C", "CPP")...).
-				Value(&test.Lang),
+				Value(&project.Language),
 			huh.NewSelect[string]().
 				Title("License").
 				Description("What license are you going to use").
-				Options(huh.NewOptions("MIT", "Apache", "GPLv3")...).
-				Value(&test.License),
+				Options(huh.NewOptions("MIT", "Apache", "GPLv3", "None")...).
+				Value(&project.License),
+			huh.NewConfirm().
+				Title("Git version control").
+				Description("Do you want to create a git repository").
+				Value(&project.Git),
 		),
 	)
 
@@ -63,16 +86,26 @@ func RunInteractive() {
 	// Print Project summary.
 	{
 		var sb strings.Builder
-		keyword := func(s string) string {
-			return lipgloss.NewStyle().Foreground(lipgloss.Color("212")).Render(s)
+		keyword := func(s any) string {
+			var str string
+			switch v := s.(type) {
+			case string:
+				str = v
+			case []string:
+				str = strings.Join(v, ", ")
+			default:
+				str = fmt.Sprintf("%v", s)
+			}
+			return lipgloss.NewStyle().Foreground(lipgloss.Color("212")).Render(str)
 		}
 		fmt.Fprintf(&sb,
-			"%s\nType:%s\nName:%s\nWritten in: %s\nLicense:%s",
+			"%s\nModules:%s\nName:%s\nWritten in: %s\nLicense:%s\nGit:%s",
 			lipgloss.NewStyle().Bold(true).Render("Project"),
-			keyword(test.Type),
-			keyword(test.Name),
-			keyword(test.Lang),
-			keyword(test.License),
+			keyword(project.Modules),
+			keyword(project.Name),
+			keyword(project.Language),
+			keyword(project.License),
+			keyword(project.Git),
 		)
 
 		fmt.Println(
@@ -84,4 +117,8 @@ func RunInteractive() {
 				Render(sb.String()),
 		)
 	}
+	// fmt.Println("From Ui:", GetModulesFromUi(project))
+	project.Modules = GetModulesFromUi(project)
+	project.License = strings.ToLower(project.License)
+	internal.ScaffoldProject(project)
 }

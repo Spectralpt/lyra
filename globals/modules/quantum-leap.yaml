@@ -1,0 +1,37 @@
+#@ load("@ytt:overlay", "overlay")
+#! quantumleap.yaml
+
+#! Add the quantumleap service
+#@overlay/match by=overlay.subset({"services": {}})
+#@overlay/match-child-defaults missing_ok=True
+---
+services:
+  quantumleap:
+    image: orchestracities/quantumleap
+    container_name: fiware-quantumleap
+    ports:
+      - "8668:8668"
+    depends_on:
+      - crate
+    environment:
+      - QL_ALLOW_UNSIGNED=true
+      - LOGLEVEL=DEBUG
+      - CRATE_HOST=crate
+      - CRATE_PORT=4200
+      - USE_GEOCODING=false
+      - CACHE_QUERIES=true
+
+#! Add the crate-db service that quantumleap depends on
+#@overlay/match by=overlay.subset({"services": {}})
+#@overlay/match-child-defaults missing_ok=True
+---
+services:
+  crate:
+    image: crate:4.8.1
+    container_name: db-crate
+    ports:
+      - "4200:4200"
+      - "5432:5432"
+    command: crate -Cauth.host_based.enabled=false -Ccluster.name=crate-cluster -Cnode.name=crate -Chttp.cors.enabled=true -Chttp.cors.allow-origin="*" -Chttp.cors.allow-credentials=true
+    environment:
+      - CRATE_HEAP_SIZE=1g

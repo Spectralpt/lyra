@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.title}}</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .project-overview {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .creation-status {
+            text-align: center;
+            margin: 2rem 0;
+        }
+        
+        .spinner {
+            font-size: 3rem;
+            color: #007bff;
+            margin: 1rem 0;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .project-details {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 0.5rem 0;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        
+        .detail-label {
+            font-weight: bold;
+            color: #495057;
+        }
+        
+        .detail-value {
+            color: #6c757d;
+        }
+        
+        .modules-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        
+        .module-tag {
+            background: #007bff;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+        }
+        
+        .status-message {
+            font-size: 1.2rem;
+            color: #495057;
+            margin: 1rem 0;
+        }
+        
+        .progress-info {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="project-overview">
+            <h1>Creating Your Project</h1>
+            
+            <div class="creation-status">
+                <div class="spinner">
+                    <i class="fas fa-spinner"></i>
+                </div>
+                <div class="status-message">We're setting up your FIWARE project...</div>
+                <div class="progress-info">This may take a few moments</div>
+            </div>
+            
+            <div class="project-details">
+                <h2>Project Overview</h2>
+                
+                <div class="detail-row">
+                    <span class="detail-label">Project Name:</span>
+                    <span class="detail-value">{{.project.Name}}</span>
+                </div>
+                
+                <div class="detail-row">
+                    <span class="detail-label">Description:</span>
+                    <span class="detail-value">{{.project.Description}}</span>
+                </div>
+                
+                <div class="detail-row">
+                    <span class="detail-label">Programming Language:</span>
+                    <span class="detail-value">{{.project.Language}}</span>
+                </div>
+                
+                <div class="detail-row">
+                    <span class="detail-label">Selected Modules:</span>
+                    <span class="detail-value">
+                        <div class="modules-list">
+                            {{range .project.Modules}}
+                            <span class="module-tag">{{.}}</span>
+                            {{end}}
+                        </div>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
