@@ -4,9 +4,9 @@ import (
 	_ "embed"
 	"fmt"
 	"lyra/globals"
+	"lyra/internal/generator"
 	"lyra/types"
 	"os"
-	"path/filepath"
 	"slices"
 )
 
@@ -35,6 +35,18 @@ func ScaffoldProject(project types.Project) error {
 	if err := os.Mkdir(project.Name, 0755); err != nil {
 		return err
 	} //testing
+
+	// Change to project directory for language-specific file generation
+	originalDir, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+	defer os.Chdir(originalDir)
+
+	if err := os.Chdir(project.Name); err != nil {
+		return err
+	}
+
 	dirs := [...]string{
 		"config",
 		"services",
@@ -42,25 +54,44 @@ func ScaffoldProject(project types.Project) error {
 
 	for _, dir := range dirs {
 		// fmt.Println("creating:", dir)
-		err := os.Mkdir(filepath.Join(project.Name, dir), 0755)
+		err := os.Mkdir(dir, 0755)
 		if err != nil {
 			return err
 		}
 	}
 
 	if project.Git {
-		path, _ := os.Getwd()
-		err = GitInit(filepath.Join(path, project.Name))
+		err = GitInit(".")
 		if err != nil {
 			return err
 		}
 	}
 
 	modules := GetModulesByNames(project.Modules)
-	GenerateComposeWithYTT(modules, project.Name)
+	GenerateComposeWithYTT(modules, ".")
+
+	// Generate language-specific files
+	if project.Language != "" {
+		gen, err := generator.NewGenerator(project.Language)
+		if err != nil {
+			return fmt.Errorf("failed to create generator for language %s: %w", project.Language, err)
+		}
+
+		if err := gen.GenerateTests(); err != nil {
+			return fmt.Errorf("failed to generate tests: %w", err)
+		}
+
+		if err := gen.GenerateBuildSystemConfig(); err != nil {
+			return fmt.Errorf("failed to generate build system config: %w", err)
+		}
+
+		if err := gen.GenerateAditionalScafolding(); err != nil {
+			return fmt.Errorf("failed to generate additional scaffolding: %w", err)
+		}
+	}
 
 	// Create LICENSE file based on selected license
-	licensePath := filepath.Join(project.Name, "LICENSE")
+	licensePath := "LICENSE"
 	switch project.License {
 	case "apache":
 		err = os.WriteFile(licensePath, []byte(apacheLicense), 0644)
@@ -75,7 +106,7 @@ func ScaffoldProject(project types.Project) error {
 	}
 
 	// Create README.md
-	readmePath := filepath.Join(project.Name, "README.md")
+	readmePath := "README.md"
 	err = os.WriteFile(readmePath, []byte(readmeTemplate), 0644)
 	if err != nil {
 		fmt.Printf("err: %v\n", err)
@@ -83,7 +114,7 @@ func ScaffoldProject(project types.Project) error {
 	}
 
 	// Create GitLab CI config
-	gitlabCIPath := filepath.Join(project.Name, ".gitlab-ci.yml")
+	gitlabCIPath := ".gitlab-ci.yml"
 	err = os.WriteFile(gitlabCIPath, []byte(gitlabCITemplate), 0644)
 	if err != nil {
 		return err
